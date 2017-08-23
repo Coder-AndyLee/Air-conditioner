@@ -1,0 +1,20 @@
+body {
+	background-color:LightBlue;
+	text-align:center;
+}
+#bg{
+	width: 1335px;
+	height: 768px;
+	border: 0px;
+	background: url(image/bg.png) no-repeat;
+	margin: 0 auto;
+}
+#report{
+	position:relative;
+	top: 200px;
+	left: 400px;
+	width: 579px;
+	height: 452px;
+	border: 0px;
+	background: transparent;
+}

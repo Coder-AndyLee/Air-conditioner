@@ -1,0 +1,58 @@
+﻿body {
+	background-color:LightBlue;
+	text-align:center;
+}
+#bg{
+	width: 1335px;
+	height: 768px;
+	border: 0px;
+	background:  url(image/bg.png) no-repeat;
+	margin: 0 auto;
+}
+#back{
+	position:relative;
+	top: 15px;
+	left: 30px;
+	width: 160px;
+	height: 60px;
+	background:url(image/back.png);
+	display:block;
+}
+#May{
+	position:absolute;
+	top: 30px;
+	left: 190px;
+	font-size:40px;
+	text-align:center;
+	font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
+}
+.calendar{
+	position:relative;
+	top: 50px;
+	left: 350px;
+	width: 650px;
+	height: 560px;
+	border: 0px;
+	background: url(image/calendar_bg.png);
+}
+.calendar table{
+	position:absolute;
+	top: 80px;
+	left: 80px;
+	width: 450px;
+	border:0px;
+}
+.calendar table td{
+	font-size:40px;
+	text-align:center;
+	font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
+	width: 70px; 
+	height:70px;
+}
+.day_num{
+	color:black;
+	text-decoration: none;
+}
+.day_num:hover{
+	color:red;
+}

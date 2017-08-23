@@ -1,0 +1,66 @@
+﻿分布式中央空调系统接口约定
+Edit by QiShi HeXin
+
+整体流程：Socket连接成功-->注册-->开启-->使用
+
+主要涉及到的参数如下：
+on：开关，1为开机，2为关机，3为待机 （整形）
+mode：模式，0为供暖，1为制冷  （整形）
+speed: 风速，1为低速，2为中速，3为高速  （整形）
+temp：当前监测温度  （浮点）
+tarTemp：目标温度  （浮点）
+host：主机开关机状态，1为开机，2为关机  （整形）
+主机请求有三种类型：HostCommandTypeSet = 1 代表回应从机设参请求
+    （整形）		HostCommandTypeAdd = 2 代表回应从机的加入请求
+    				HostCommandTypeSetAll = 3 代表主机统一设置所有从机的参数
+    				HostCommandTypeWatcher = 4 代表主机动态的发送从机温度监视情况
+从机请求有两种类型：SlaveCommandTypeAdd = 1 代表一个从机请求加入（注册）
+    （整形）		SlaveCommandTypeSet = 2 代表一个从机请求修改温度、风速等参数
+
+
+一些指令串的发送方法：
+1、主机和从机需要先在服务器注册，同时间只能有一个主机，从机不限，注册的指令为:choosePrio-0或1（0为主机，1为从机）  ！！！这是当Socket连接成功后首先要做的一件事情！！！
+示范
+注册主机：
+choosePrio-0
+注册从机：
+choosePrio-1
+
+Tips：注册这个地方是和消息分发服务器相关的，只有注册以后，服务器才知道应该往哪边分发（谁是主机谁是从机）这个服务器已经用Python写好了，我们所有组都可以直接用它，不用管它怎么实现了。
+
+2、从机若要打开空调，需要发送请求给主机，由主机返回房间号、设定的温度、以及模式等，从机请求的的命令为：[{"requestType":1}]，主机返回命令为[{"roomNum":2,"temp":21,"tarTemp":25,"speed":1,"mode":1,"cost":0.00,"host":1,"requestType":2}](里面的数字根据实际情况设置)
+注意指令要服务器识别要加上“msg-”才能被发送，否则为无效指令
+示范
+请求开启：
+msg-[{"requestType":1}] 从机负责发送开启请求，等主机返回信息中再告诉它它的ID是多少，这样避免了可能从机有一样的名字导致的不可预测的错误
+主机返回信息：
+msg-[{"roomNum":2,"temp":21,"tarTemp":25,"speed":1,"mode":1,"cost":0.00,"host":1,"requestType":2}]
+
+3、从机单独请求调节温度，命令为[{"roomNum":2,"tarTemp":21,"requestType":2}]，主机给予响应时回复[{"roomNum":2,"temp":21,"tarTemp":18,"speed":1,"mode":1,"cost":0.00,"host":1,"requestType":1}]
+示范
+房间号为2的房间空调请求调节温度为20度：
+msg-[{"roomNum":2,"tarTemp":20,"requestType":2}]
+主机给予响应：
+msg-[{"roomNum":2,"temp":21,"tarTemp":20,"speed":1,"mode":1,"cost":0.00,"host":1,"requestType":1}]
+
+
+4、主机改变全部的从机的温度，命令为,[{"host":1,"mode":1,"tarTemp":20,"requestType":3}],从机不需要回复
+示范
+msg-[{"host":1,"mode":1,"tarTemp":20,"requestType":3}]
+
+5、每隔一个固定的时间周期，主机就会发送从机当前的监视信息，从机只需接收并更新面板显示，不需要回复
+示范
+msg-[{"roomNum":2,"temp":21,"tarTemp":25,"speed":1,"mode":1,"cost":0.00,"host":1,"requestType":4}]
+
+
+另：关于从机显示费用的约定
+允许动态给从机显示屏更新费用，原理是利用发送方法5，加入 "cost":12.5 字段，也可以不显示费用，这一点可以在从机接收json串的时候进行处理（需要显示就get，不需要可以略过）
+host字段表示主机开关机情况，可以根据需要加入...建议加入吧...
+新加了个从机状态---待机（值：3）
+刷新频率由主机设定，从主机端控制一下发送频率就可以了，不需要发给从机...
+
+温度的cancel没卵用
+改变工作模式后（改成加热），目标温度小于环境温度时，状态仍是running
+
+
+"host":1,
